@@ -1,0 +1,68 @@
+-- ENTREGA 3: SCRIPT DE CRIAÇÃO E POPULAÇÃO DO BANCO DE DADOS
+
+DROP DATABASE IF EXISTS officetech_db;
+CREATE DATABASE officetech_db;
+USE officetech_db;
+
+-- 2. CRIAÇÃO DA TABELA USUARIO
+CREATE TABLE clientes (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(50) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL
+);
+
+-- 3. CRIAÇÃO DA TABELA PRODUTOs
+CREATE TABLE equipamento (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+	estado ENUM('Disponivel', 'Alugado')
+);
+
+-- 4. CRIAÇÃO DA TABELA MOVIMENTACAO (RF14 - Histórico/Rastreabilidade)
+CREATE TABLE movimentacao (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    tipo_movimentacao ENUM('Devolução', 'Aluguel') NOT NULL, 
+    data_saida DATE NOT NULL,
+	data_devolucao_prevista DATE NOT NULL,
+	data_devolucao_real DATE NOT NULL,
+    
+    -- Chaves Estrangeiras para Rastreabilidade
+    id_equipamento INT,
+    id_cliente INT, -- Responsável pela movimentação
+    
+    FOREIGN KEY (id_equipamento) REFERENCES equipamento(id),
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id)
+);
+
+
+-- 5. POPULAÇÃO INICIAL (Mínimo de 3 registros por tabela)
+
+-- 5.1. Usuários
+INSERT INTO clientes (nome, email, senha) VALUES
+('Joana Almoxarifado', 'joana@gmail.com', 'senha_hashed_1'),
+('Rafael Gerente', 'rafael@gmail.com', 'senha_hashed_2'),
+('Carlos Estagiario', 'carlos@gmail.com', 'senha_hashed_3');
+
+-- 5.2. Produtos (com estoque mínimo e variações)
+-- Obs: O estoque_atual inicia baixo para facilitar o teste de entrada/saída.
+INSERT INTO equipamento (nome, descricao, estado) VALUES
+('Cimento CP II-F 50kg', 'Cimento Portland composto, resistente a sulfatos', 'Disponivel'),
+('Tinta Acrílica Premium', 'Lata 18L, acabamento acetinado', 'Disponivel'),
+('Barra de Aço CA-50 3/8"', 'Barra de Aço para estruturas', 'Disponivel');
+
+-- 5.3. Movimentações (Ligando Usuário e Produto)
+-- Movimentação 1: Entrada de Cimento por Joana
+INSERT INTO movimentacao (tipo_movimentacao, data_saida, data_devolucao_prevista, data_devolucao_real, id_equipamento, id_cliente) VALUES
+('Entrada', '2025-11-20', '2025-12-20', '2025-12-10', 1, 1); -- Produto 1 (Cimento), Usuário 1 (Joana)
+
+-- Movimentação 2: Entrada de Tinta por Rafael
+INSERT INTO movimentacao (tipo_movimentacao, data_saida, data_devolucao_prevista, data_devolucao_real, id_equipamento, id_cliente) VALUES
+('Entrada', '2025-11-21', '2025-12-21', '2025-12-11', 2, 2); -- Produto 2 (Tinta), Usuário 2 (Rafael)
+
+-- Movimentação 3: Saída de Aço por Carlos
+INSERT INTO movimentacao (tipo_movimentacao, data_saida, data_devolucao_prevista, data_devolucao_real, id_equipamento, id_cliente) VALUES
+('Saida', '2025-11-24', '2025-12-24', '2025-12-14', 3, 3); -- Produto 3 (Aço), Usuário 3 (Carlos)
+
+select * from clientes;
